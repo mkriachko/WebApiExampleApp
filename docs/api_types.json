@@ -1,0 +1,19 @@
+User type;
+User
+{
+	id: int;
+	login: string;
+	email: string;
+	password: string;
+	avatar: url //ссылка на аватарку на сервере
+	friends:[]; //int array, users id's
+};
+
+News type;
+News{
+	id: int;
+	date: DateTime;
+	title: string;
+	text: string //multiline
+	image: url //ссылка на картинку новости на сервере
+};
