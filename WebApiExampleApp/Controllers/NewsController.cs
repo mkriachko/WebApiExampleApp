@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebApiExampleApp.Database;
 using WebApiExampleApp.Models;
+using WebApiExampleApp.Resources;
 
 namespace WebApiExampleApp.Controllers
 {
@@ -22,13 +24,15 @@ namespace WebApiExampleApp.Controllers
             _logger = logger;
             _repo = repo;
         }
-
+        
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<NewsItem>>> GetNews(int offset = 0, int count = 10)
         {
             return Ok(await _repo.Get(offset, count));
         }
 
+        [Authorize(Roles = Roles.Admin)]
         [HttpPost]
         public async Task<ActionResult> AddNewsItem([FromBody] NewsItem newsItem)
         {
@@ -36,6 +40,7 @@ namespace WebApiExampleApp.Controllers
             return Created($"api/[controller]/{result.Id}", result);
         }
 
+        [Authorize(Roles = Roles.Admin)]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteNewsItem(int id)
         {

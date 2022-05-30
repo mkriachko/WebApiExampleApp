@@ -28,5 +28,16 @@ namespace WebApiExampleApp.Database
             var users = (await context.Users.FirstAsync(x => x.Login == login)).Friends.ToList();
             return users;
         }
+
+        public async Task Delete(int userId)
+        {
+            using ApplicationDbContext context = new(_options);
+            var user = context.Users.FirstOrDefault(n => n.Id == userId);
+            if (user != null)
+            {
+                context.Users.Remove(user);
+                await context.SaveChangesAsync();
+            }
+        }
     }
 }

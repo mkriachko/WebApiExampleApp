@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebApiExampleApp.Database;
 using WebApiExampleApp.Models;
+using WebApiExampleApp.Resources;
 
 namespace WebApiExampleApp.Controllers
 {
@@ -23,10 +25,29 @@ namespace WebApiExampleApp.Controllers
             _repo = repo;
         }
 
+        [Authorize(Roles = Roles.Admin)]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> Get()
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             return Ok( await _repo.Get());
+        }
+
+        [Authorize()]
+        [HttpGet("friends")]
+        public async Task<ActionResult<IEnumerable<User>>> GetFriends()
+        {
+            var login = User.Identity.Name;
+            var friends = await _repo.GetFriends(login);
+            var result = friends.Select(f => new { Login = f.Login });
+            return Ok(result);
+        }
+
+        [Authorize(Roles = Roles.Admin)]
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteUser(int id)
+        {
+            await _repo.Delete(id);
+            return Ok();
         }
     }
 }
