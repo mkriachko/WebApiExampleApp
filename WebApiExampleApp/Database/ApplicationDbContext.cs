@@ -21,5 +21,10 @@ namespace WebApiExampleApp.Database
         {
             DbInitializer.Initialize(this);
         }
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<Session>().HasKey(s => s.RefreshToken);
+            builder.Entity<User>().HasIndex(u => u.Login).IsUnique();
+        }
     }
 }

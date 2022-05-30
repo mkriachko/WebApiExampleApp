@@ -32,6 +32,7 @@ namespace WebApiExampleApp
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
             optionsBuilder.UseInMemoryDatabase("ApplicationDB");
             services.AddSingleton<DbContextOptions<ApplicationDbContext>>(optionsBuilder.Options);
+            services.AddTransient<NewsRepository>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiExampleApp", Version = "v1" });

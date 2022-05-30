@@ -21,8 +21,13 @@ namespace WebApiExampleApp.Database
         {
             var newsList = new List<NewsItem>()
             {
-
+                new NewsItem() { Title = "First", Text = "Lorem ipsum", DateTime = DateTime.Now },
+                new NewsItem() { Title = "Second", Text = "Gaudeamus igitur", DateTime = DateTime.Now },
+                new NewsItem() { Title = "Third", Text = "С точки зрения банальной эрудиции", DateTime = DateTime.Now },
+                new NewsItem() { Title = "Fourth", Text = "Как уважаемый профессор докторологии", DateTime = DateTime.Now },
+                new NewsItem() { Title = "Fifth", Text = "Так выпьем няня где же кружка", DateTime = DateTime.Now },
             };
+            context.News.AddRange(newsList);
             context.SaveChanges();
         }
     }
