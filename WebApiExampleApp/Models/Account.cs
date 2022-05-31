@@ -24,6 +24,7 @@ namespace WebApiExampleApp.Models
 
     public class Session
     {
+        public int Id { get; set; }
         public string Login { get; set; }
         public DateTime LoggedOn { get; set; }
         public string RefreshToken { get; set; }

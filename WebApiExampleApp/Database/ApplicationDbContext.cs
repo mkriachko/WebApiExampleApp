@@ -23,7 +23,6 @@ namespace WebApiExampleApp.Database
         }
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<Session>().HasKey(s => s.RefreshToken);
             builder.Entity<User>().HasIndex(u => u.Login).IsUnique();
             builder.Entity<User>().HasMany(u => u.Friends).WithMany(u => u.FriendsOf)
                 .UsingEntity<UserFriendSet>(
