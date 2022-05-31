@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApiExampleApp.Database;
+using WebApiExampleApp.Filters;
 using WebApiExampleApp.Models;
 using WebApiExampleApp.Resources;
 
@@ -24,23 +25,23 @@ namespace WebApiExampleApp.Controllers
             _logger = logger;
             _repo = repo;
         }
-        
-        [Authorize]
+
+        [CustomAuthorizeFilter]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<NewsItem>>> GetNews(int offset = 0, int count = 10)
         {
             return Ok(await _repo.Get(offset, count));
         }
 
-        [Authorize(Roles = Roles.Admin)]
+        [CustomAuthorizeFilter(new string[] { Roles.Admin })]
         [HttpPost]
         public async Task<ActionResult> AddNewsItem([FromBody] NewsItem newsItem)
         {
             var result = await _repo.Add(newsItem);
-            return Created($"api/[controller]/{result.Id}", result);
+            return Created($"api/{RouteData.Values["controller"]}/{result.Id}", result);
         }
 
-        [Authorize(Roles = Roles.Admin)]
+        [CustomAuthorizeFilter(new string[] { Roles.Admin })]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteNewsItem(int id)
         {

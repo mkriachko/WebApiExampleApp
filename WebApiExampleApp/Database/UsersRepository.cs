@@ -18,15 +18,16 @@ namespace WebApiExampleApp.Database
         public async Task<IEnumerable<User>> Get()
         {
             using ApplicationDbContext context = new(_options);
-            var users = await context.Users.ToListAsync();
+            var users = await context.Users.Include(x => x.Friends).ToListAsync();
             return users;
         }
 
         public async Task<IEnumerable<User>> GetFriends(string login)
         {
             using ApplicationDbContext context = new(_options);
-            var users = (await context.Users.FirstAsync(x => x.Login == login)).Friends.ToList();
-            return users;
+            var user = await context.Users.Include(x => x.Friends).FirstAsync(x => x.Login == login);
+            var friends = user.Friends.ToList();
+            return friends;
         }
 
         public async Task Delete(int userId)

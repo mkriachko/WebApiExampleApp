@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApiExampleApp.Database;
+using WebApiExampleApp.Filters;
 using WebApiExampleApp.Models;
 using WebApiExampleApp.Resources;
 
@@ -25,14 +26,14 @@ namespace WebApiExampleApp.Controllers
             _repo = repo;
         }
 
-        [Authorize(Roles = Roles.Admin)]
+        [CustomAuthorizeFilter(new string[] { Roles.Admin })]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             return Ok( await _repo.Get());
         }
 
-        [Authorize()]
+        [CustomAuthorizeFilter]
         [HttpGet("friends")]
         public async Task<ActionResult<IEnumerable<User>>> GetFriends()
         {
@@ -42,7 +43,7 @@ namespace WebApiExampleApp.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = Roles.Admin)]
+        [CustomAuthorizeFilter(new string[] { Roles.Admin })]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUser(int id)
         {

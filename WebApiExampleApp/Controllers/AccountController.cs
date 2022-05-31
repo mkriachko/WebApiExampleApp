@@ -11,6 +11,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using WebApiExampleApp.Database;
+using WebApiExampleApp.Filters;
 using WebApiExampleApp.Models;
 using WebApiExampleApp.Resources;
 
@@ -29,7 +30,7 @@ namespace WebApiExampleApp.Controllers
             _repo = repo;
         }
 
-        [Authorize]
+        [CustomAuthorizeFilter]
         [HttpGet]
         public IActionResult GetInfo()
         {
@@ -37,25 +38,47 @@ namespace WebApiExampleApp.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult CreateAccount([FromBody] NewAccount account)
+        public async Task<ActionResult<User>> CreateAccount([FromBody] NewAccount account)
         {
-            throw new NotImplementedException();
+            var result = await _repo.Register(account);
+            return Created($"api/{RouteData.Values["controller"]}/{result.Id}", result);
         }
 
         [HttpPost("logon")]
         public async Task<ActionResult<Token>> Logon([FromBody] Account account)
         {
             var user = await _repo.Logon(account);
+            if (user == null)
+                throw new Exception("Wrong Credentials");
             var encodedJwt = GenerateAccessToken(user);
             var refreshToken = GenerateRefreshToken();
             var response = new Token { AccessToken = encodedJwt, RefreshToken = refreshToken };
+            await _repo.AddSession(new Session { RefreshToken = refreshToken, Login = user.Login, LoggedOn = DateTime.UtcNow });
             return Ok(response);
         }
 
-        [HttpPost("session")]
-        public IActionResult RenewSession([FromBody] Session session)
+        [HttpGet("session")]
+        public async Task<ActionResult<IEnumerable<Session>>> GetSessions()
         {
-            throw new NotImplementedException();
+            var result = await _repo.GetSessions();
+            return Ok(result);
+        }
+
+        [HttpPost("session")]
+        public async Task<ActionResult<Token>> RenewSession([FromBody] Token token)
+        {
+            var user = await _repo.GetUser(GetUserNameFromExpiredToken(token.AccessToken));
+            if (user == null)
+                return Unauthorized();
+            
+            var encodedJwt = GenerateAccessToken(user);
+            var refreshToken = GenerateRefreshToken();
+            var response = new Token { AccessToken = encodedJwt, RefreshToken = refreshToken };
+            
+            var session = await _repo.UpdateSession(token.RefreshToken, new Session { RefreshToken = refreshToken, LoggedOn = DateTime.UtcNow, Login = user.Login });
+            if (session == null)
+                return Unauthorized();
+            return Ok(response);
         }
 
         private string GetUserNameFromExpiredToken(string token)

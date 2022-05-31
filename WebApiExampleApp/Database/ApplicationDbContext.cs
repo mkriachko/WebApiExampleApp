@@ -25,6 +25,10 @@ namespace WebApiExampleApp.Database
         {
             builder.Entity<Session>().HasKey(s => s.RefreshToken);
             builder.Entity<User>().HasIndex(u => u.Login).IsUnique();
+            builder.Entity<User>().HasMany(u => u.Friends).WithMany(u => u.FriendsOf)
+                .UsingEntity<UserFriendSet>(
+                f => f.HasOne<User>().WithMany().HasForeignKey(f => f.FriendId),
+                f => f.HasOne<User>().WithMany().HasForeignKey(f => f.FriendOfId));
         }
     }
 }

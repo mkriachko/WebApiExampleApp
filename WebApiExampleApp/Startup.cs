@@ -15,9 +15,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WebApiExampleApp.Database;
 using WebApiExampleApp.Filters;
+using WebApiExampleApp.Middleware;
 using WebApiExampleApp.Resources;
 
 namespace WebApiExampleApp
@@ -34,7 +36,10 @@ namespace WebApiExampleApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         { 
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            });
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
             optionsBuilder.UseInMemoryDatabase("ApplicationDB");
             services.AddSingleton<DbContextOptions<ApplicationDbContext>>(optionsBuilder.Options);
@@ -105,6 +110,8 @@ namespace WebApiExampleApp
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApiExampleApp v1"));
             }
+
+            app.UseMiddleware<ExceptionHandlerMiddleware>();
 
             app.UseHttpsRedirection();
 
